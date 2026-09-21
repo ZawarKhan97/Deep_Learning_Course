@@ -1,0 +1,20 @@
+# Plot settings for activation (and similar) figures.
+# Edit this file to change ranges, style, and output without touching code.
+
+x_min: -6.0
+x_max: 6.0
+points: 1000
+
+figsize: [8, 6]
+dpi: 150
+linewidth: 2.0
+grid_alpha: 0.3
+axis_color: gray
+function_color: C0
+derivative_color: C1
+
+# Directory name relative to the calling script (Assignment_1/figures by default).
+save_dir: figures
+
+# Open interactive windows when a display is available (figures are always saved).
+show: true

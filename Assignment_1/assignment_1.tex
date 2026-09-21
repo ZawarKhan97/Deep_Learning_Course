@@ -1,0 +1,214 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{hyperref}
+
+\onehalfspacing
+
+% Python listing style
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray!70!black}\itshape,
+  stringstyle=\color{teal},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  numbersep=8pt,
+  frame=single,
+  breaklines=true,
+  showstringspaces=false,
+  tabsize=4,
+  captionpos=b,
+  xleftmargin=1.5em,
+  framexleftmargin=1em,
+}
+
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
+
+\begin{document}
+
+% ---------------------------------------------------------------------------
+% Title Page
+% ---------------------------------------------------------------------------
+\begin{titlepage}
+  \thispagestyle{empty}
+  \centering
+  \vspace*{2.5cm}
+
+  {\LARGE\bfseries Assignment 1\par}
+  \vspace{1.5cm}
+
+  {\Large Course: Deep Learning\par}
+  \vspace{0.8cm}
+
+  {\large Instructor: Dr.\ Ali Irtaza\par}
+  \vspace{0.5cm}
+
+  {\large Department of Electrical Engineering\par}
+  \vspace{0.3cm}
+
+  {\large Institute of Space Technology\par}
+
+  \vfill
+
+  {\large Submitted by:\par}
+  \vspace{0.3cm}
+  {\Large Zawar Khan\par}
+
+  \vspace{1.5cm}
+  {\large \today\par}
+\end{titlepage}
+
+% ---------------------------------------------------------------------------
+% Question 5
+% ---------------------------------------------------------------------------
+\section*{Q5.\ Find and plot the derivatives of (a)~ReLU, (b)~Sigmoid, and
+(c)~Hyperbolic Tangent functions.}
+
+% ===========================================================================
+\subsection*{ (a) ReLU }
+% ===========================================================================
+
+\subsubsection*{Analytical Form}
+
+The Rectified Linear Unit (ReLU) is defined as
+\begin{equation}
+  \mathrm{ReLU}(x) = \max(0, x) =
+  \begin{cases}
+    0, & x < 0, \\
+    x, & x \geq 0.
+  \end{cases}
+\end{equation}
+Differentiating piecewise (taking the subgradient at \(x = 0\) to be \(0\),
+as is common in practice) yields
+\begin{equation}
+  \mathrm{ReLU}'(x) =
+  \begin{cases}
+    0, & x \leq 0, \\
+    1, & x > 0.
+  \end{cases}
+\end{equation}
+
+Figure 1 shows the ReLU activation function and its derivative.
+\subsubsection*{Plot}
+The derivative in python code is simple finite check in the limits given while for the derivative at Zero its taken as 0.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/relu.png}
+  \caption{ReLU activation (top) and its derivative (bottom).}
+  \label{fig:relu}
+\end{figure}
+
+\subsubsection*{Python Implementation}
+For the computation of derivatives we have used the NumPy library.
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={ReLU and its derivative}]
+import numpy as np
+def relu(x):
+    return np.maximum(0.0, x)
+
+def relu_derivative(x):
+    return (x > 0).astype(float)
+\end{lstlisting}
+\end{minipage}
+
+\clearpage
+% ===========================================================================
+\subsection*{ (b) Sigmoid }
+% ===========================================================================
+
+\subsubsection*{Analytical Form}
+
+The logistic sigmoid is
+\begin{equation}
+  \sigma(x) = \frac{1}{1 + e^{-x}}.
+\end{equation}
+Differentiating with respect to \(x\):
+\begin{align}
+  \sigma'(x)
+    &= \frac{e^{-x}}{(1 + e^{-x})^2}
+     = \frac{1}{1 + e^{-x}} \cdot \frac{e^{-x}}{1 + e^{-x}}
+     = \sigma(x)\,(1 - \sigma(x)).
+\end{align}
+Thus
+\begin{equation}
+  \sigma'(x) = \sigma(x)\,(1 - \sigma(x)).
+\end{equation}
+
+\subsubsection*{Figure}
+Figure 2 shows the Sigmoid activation function and its derivative. Chain rule has been used to find the derivative.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/sigmoid.png}
+  \caption{Sigmoid activation (top) and its derivative (bottom).}
+  \label{fig:sigmoid}
+\end{figure}
+
+\subsubsection*{Python Implementation}
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Sigmoid and its derivative}]
+import numpy as np
+
+def sigmoid(x):
+    return 1.0 / (1.0 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    s = sigmoid(x)
+    return s * (1.0 - s)
+\end{lstlisting}
+\end{minipage}
+
+\clearpage
+% ===========================================================================
+\subsection*{ (c) Hyperbolic Tangent }
+% ===========================================================================
+
+\subsubsection*{Analytical Form}
+
+The hyperbolic tangent is
+\begin{equation}
+  \tanh(x) = \frac{e^{x} - e^{-x}}{e^{x} + e^{-x}}
+           = \frac{\sinh(x)}{\cosh(x)}.
+\end{equation}
+Its derivative follows from the quotient rule (or the identity
+\(\frac{d}{dx}\tanh x = \mathrm{sech}^2 x\)):
+\begin{equation}
+  \tanh'(x) = 1 - \tanh^2(x) = \mathrm{sech}^2(x).
+\end{equation}
+
+\subsubsection*{Figure}
+Figure 3 shows the Hyperbolic Tangent activation function and its derivative. Chain rule has been used to find the derivative.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/tanh.png}
+  \caption{Hyperbolic tangent activation (top) and its derivative (bottom).}
+  \label{fig:tanh}
+\end{figure}
+
+\subsubsection*{Python Implementation}
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Hyperbolic tangent and its derivative}]
+import numpy as np
+
+def tanh_fn(x):
+    return np.tanh(x)
+
+def tanh_derivative(x):
+    t = np.tanh(x)
+    return 1.0 - t**2
+\end{lstlisting}
+\end{minipage}
+
+\end{document}
