@@ -30,6 +30,8 @@
   captionpos=b,
   xleftmargin=1.5em,
   framexleftmargin=1em,
+  aboveskip=1.2em,
+  belowskip=1em,
 }
 
 \titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
@@ -110,9 +112,10 @@ The derivative in python code is simple finite check in the limits given while f
 \end{figure}
 
 \subsubsection*{Python Implementation}
+\noindent\begin{minipage}{\linewidth}
 For the computation of derivatives we have used the NumPy library.
 
-\noindent\begin{minipage}{\linewidth}
+\vspace{0.6em}
 \begin{lstlisting}[caption={ReLU and its derivative}]
 import numpy as np
 def relu(x):
@@ -156,6 +159,7 @@ Figure 2 shows the Sigmoid activation function and its derivative. Chain rule ha
 \end{figure}
 
 \subsubsection*{Python Implementation}
+\par\medskip
 \noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Sigmoid and its derivative}]
 import numpy as np
@@ -198,6 +202,7 @@ Figure 3 shows the Hyperbolic Tangent activation function and its derivative. Ch
 \end{figure}
 
 \subsubsection*{Python Implementation}
+\par\medskip
 \noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Hyperbolic tangent and its derivative}]
 import numpy as np
