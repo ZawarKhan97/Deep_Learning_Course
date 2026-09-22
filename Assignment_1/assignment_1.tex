@@ -73,6 +73,79 @@
 \end{titlepage}
 
 % ---------------------------------------------------------------------------
+% Question 2
+% ---------------------------------------------------------------------------
+\section*{Q2.\ Properties of the logistic sigmoid}
+
+Show that the logistic sigmoid function satisfies
+\(\sigma(-a)=1-\sigma(a)\) and that its inverse is given by
+\(\sigma^{-1}(y)=\log\{y/(1-y)\}\).
+
+The logistic sigmoid is defined by
+\begin{equation}
+  \sigma(a)=\frac{1}{1+e^{-a}}.
+  \label{eq:sigmoiddef}
+\end{equation}
+
+\subsection*{(i)\ \(\sigma(-a)=1-\sigma(a)\)}
+
+Substitute \(-a\) into~\eqref{eq:sigmoiddef}:
+\begin{equation}
+  \sigma(-a)=\frac{1}{1+e^{-(-a)}}=\frac{1}{1+e^{a}}.
+\end{equation}
+Next,
+\begin{equation}
+  1-\sigma(a)
+    =1-\frac{1}{1+e^{-a}}
+    =\frac{(1+e^{-a})-1}{1+e^{-a}}
+    =\frac{e^{-a}}{1+e^{-a}}.
+\end{equation}
+Multiply the numerator and denominator of \(\sigma(-a)\) by \(e^{-a}\):
+\begin{equation}
+  \sigma(-a)
+    =\frac{1}{1+e^{a}}\cdot\frac{e^{-a}}{e^{-a}}
+    =\frac{e^{-a}}{e^{-a}+1}
+    =\frac{e^{-a}}{1+e^{-a}}.
+\end{equation}
+Therefore
+\begin{equation}
+  \sigma(-a)=1-\sigma(a).
+\end{equation}
+
+\subsection*{(ii)\ Inverse \(\sigma^{-1}(y)=\log\{y/(1-y)\}\)}
+
+Set \(y=\sigma(a)\) and solve for \(a\):
+\begin{equation}
+  y=\frac{1}{1+e^{-a}}.
+\end{equation}
+Multiply both sides by \(1+e^{-a}\):
+\begin{equation}
+  y\,(1+e^{-a})=1.
+\end{equation}
+Expand:
+\begin{equation}
+  y+y\,e^{-a}=1.
+\end{equation}
+Isolate the exponential:
+\begin{align}
+  y\,e^{-a}&=1-y,\\
+  e^{-a}&=\frac{1-y}{y}.
+\end{align}
+Take the natural logarithm of both sides:
+\begin{equation}
+  -a=\log\!\left(\frac{1-y}{y}\right).
+\end{equation}
+Using \(-\log x=\log(1/x)\),
+\begin{equation}
+  a=\log\!\left(\frac{y}{1-y}\right).
+\end{equation}
+Hence
+\begin{equation}
+  \sigma^{-1}(y)=\log\!\left\{\frac{y}{1-y}\right\}.
+\end{equation}
+
+\clearpage
+% ---------------------------------------------------------------------------
 % Question 3
 % ---------------------------------------------------------------------------
 \section*{Q3.\ Consider two sets of outputs}
