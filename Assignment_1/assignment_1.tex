@@ -9,6 +9,7 @@
 \usepackage{titlesec}
 \usepackage{caption}
 \usepackage{hyperref}
+\usepackage{url}
 
 \onehalfspacing
 
@@ -71,6 +72,221 @@
   {\large \today\par}
 \end{titlepage}
 
+% ---------------------------------------------------------------------------
+% Question 3
+% ---------------------------------------------------------------------------
+\section*{Q3.\ Consider two sets of outputs}
+
+\begin{enumerate}
+  \item[\textbf{Set~A:}] outcomes with \emph{minimum to low} entropy
+  \item[\textbf{Set~B:}] outcomes with \emph{medium to high} entropy
+\end{enumerate}
+
+\subsection*{(a) Which set is more meaningful for decreasing unpredictable behaviour?}
+
+\subsubsection*{Shannon entropy (analytical)}
+
+Shannon's information theory defines the unpredictability of a discrete
+random variable~\cite{He2018}. The Shannon measure of unpredictability is the
+\textbf{Shannon entropy}. For a single outcome \(i\) with probability \(p_i\),
+Shannon defined the \emph{surprise} (self-information) as
+\begin{equation}
+  \mathrm{information}(i)
+    = \log_b\!\left(\frac{1}{p_i}\right)
+    = -\log_b(p_i).
+  \label{eq:selfinfo}
+\end{equation}
+Interpretation of~\eqref{eq:selfinfo}:
+\begin{itemize}
+  \item If \(p_i\) is close to \(1\) (a near-certain event), then
+        \(\log(1/p_i)\) is close to \(0\) --- almost no information/surprise.
+  \item If \(p_i\) is close to \(0\) (a rare event), then
+        \(\log(1/p_i)\) is large --- a large amount of information/surprise.
+\end{itemize}
+
+For \emph{many} outcomes, the entropy of the full distribution is the
+\textbf{probability-weighted sum} of these surprises:
+\begin{equation}
+  H(X)
+    = \sum_{i} p_i \,\mathrm{information}(i)
+    = \sum_{i} p_i \bigl(-\log_b p_i\bigr)
+    = -\sum_{i} p_i \log_b p_i,
+  \label{eq:shannon}
+\end{equation}
+where \(p_i\) is the probability of outcome \(i\) and the base \(b\) chooses
+the unit (bits when \(b=2\)). Equation~\eqref{eq:shannon} is the general
+multi-outcome formula used for Set~A and Set~B below.
+
+\paragraph{Special case (two outcomes).}
+For a Bernoulli system with probabilities \(p\) and \(1-p\),~\eqref{eq:shannon}
+reduces to the \textbf{binary entropy}
+\begin{equation}
+  H(p) = -p\log_2 p - (1-p)\log_2(1-p).
+\end{equation}
+\(H(p)\) is \emph{low} when \(p\) is near \(0\) or near \(1\) (highly
+predictable outcomes) and reaches its \emph{maximum} at \(p=0.5\) (maximum
+randomness). Thus ``minimum to low entropy'' corresponds to probability mass
+concentrated on nearly certain outcomes, while ``medium to high entropy''
+corresponds to more uniformly uncertain outcomes.
+
+\subsubsection*{Figures}
+
+Figure~\ref{fig:binary} shows the binary-entropy special case \(H(p)\).
+Entropy is smallest near the extremes of \(p\).
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/binary_entropy.png}
+  \caption{Binary Shannon entropy \(H(p)\) versus probability \(p\)
+  (special case of two outcomes). Low entropy occurs for very small or
+  very large \(p\).}
+  \label{fig:binary}
+\end{figure}
+
+To connect~\eqref{eq:shannon} to Set~A and Set~B, we form two sample sets
+whose outcomes are integers from \(1\) to \(10\) (size \(N=100\)):
+\begin{itemize}
+  \item \textbf{Set~A:} draws are random, but a few numbers appear much more
+        often (peaked frequencies \(\Rightarrow\) low entropy).
+  \item \textbf{Set~B:} draws are nearly uniform, so the same number rarely
+        dominates (spread frequencies \(\Rightarrow\) high entropy).
+\end{itemize}
+Empirical probabilities are \(p_i = n_i/N\). Importantly:
+\begin{itemize}
+  \item The \textbf{top histograms} show only \emph{counts} (how often each
+        outcome appears). They are \emph{not} an entropy curve.
+  \item \textbf{Entropy} is a \emph{single number} for each whole set,
+        \(H=-\sum_i p_i\log_2 p_i\), shown in the \textbf{bottom panel} of
+        Figure~\ref{fig:sets}.
+\end{itemize}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.95\textwidth]{figures/set_ab_entropy.png}
+  \caption{Top: outcome frequencies for Set~A and Set~B (values 1--10).
+  Bottom: Shannon entropy of each set (one bar per set). The histograms
+  describe the data; the bottom panel is where entropy is compared.}
+  \label{fig:sets}
+\end{figure}
+
+\subsubsection*{Conclusion}
+
+Entropy is a direct measure of randomness / unpredictability. To
+\emph{reduce} unpredictable behaviour we need outcomes that are as
+predictable as possible --- concentrated probability mass and
+\textbf{low Shannon entropy}. From~\eqref{eq:selfinfo},~\eqref{eq:shannon},
+and Figures~\ref{fig:binary}--\ref{fig:sets}, that regime is exactly
+\textbf{Set~A}. Set~B corresponds to greater uncertainty and is less
+suitable if the design goal is to reduce randomness.
+
+\noindent\textit{Note.} Full plotting scripts and libraries are in the course
+repository~\cite{CourseRepo}.
+
+
+\subsubsection*{Python Implementation}
+\par\medskip
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Shannon entropy and binary entropy}]
+import numpy as np
+
+def shannon_entropy(probs, base=2.0):
+    """H = -sum p_i log_b(p_i)  (weighted sum over many outcomes)."""
+    p = np.asarray(probs, dtype=float)
+    p = p / p.sum()
+    nz = p > 0
+    return float(-(p[nz] * (np.log(p[nz]) / np.log(base))).sum())
+
+def binary_entropy(p, base=2.0):
+    """Special case: H(p) for Bernoulli(p); low near p=0 or p=1."""
+    p = np.clip(np.asarray(p, dtype=float), 0.0, 1.0)
+    h = np.zeros_like(p, dtype=float)
+    mid = (p > 0) & (p < 1)
+    pm = p[mid]
+    h[mid] = -(pm * np.log(pm) + (1 - pm) * np.log(1 - pm)) / np.log(base)
+    return h
+\end{lstlisting}
+\end{minipage}
+
+\clearpage
+% ---------------------------------------------------------------------------
+% Question 4
+% --------------------------------------------------------------------------
+\section*{Q4.\ Normal distribution and maximum entropy}
+
+If we know the mean \(\mu\) and standard deviation \(\sigma\), is it true that
+the Normal (Gaussian) distribution has the maximum entropy?
+
+\subsubsection*{Differential entropy}
+
+For a continuous random variable with density \(p(x)\), Shannon's discrete
+sum becomes an integral the \textbf{differential entropy}
+\begin{equation}
+  H(X) = -\int_{-\infty}^{\infty} p(x)\,\log p(x)\,dx
+  \label{eq:diffent}
+\end{equation}
+This is the continuous
+analogue of~\eqref{eq:shannon}. Standard results in information theory show
+that, among all continuous densities that share a fixed mean \(\mu\) and
+fixed variance \(\sigma^2\), the Gaussian density uniquely maximises
+\(H(X)\)~\cite{Blahut2002}.
+
+\subsubsection*{Entropy of a Gaussian}
+
+For \(X\sim\mathcal{N}(\mu,\sigma^2)\) the integral~\eqref{eq:diffent}
+evaluates in closed form to
+\begin{equation}
+  H(X) = \tfrac{1}{2}\log_2\!\bigl(2\pi e\,\sigma^2\bigr)
+  \quad\text{(bits)}.
+  \label{eq:gaussH}
+\end{equation}
+Two observations follow immediately from~\eqref{eq:gaussH}:
+\begin{itemize}
+  \item \(H(X)\) depends only on the variance \(\sigma^2\), \emph{not} on the
+        mean \(\mu\). Entropy measures unpredictability (spread), not where
+        the bell curve is centred. Shifting the curve left or right does not
+        change how uncertain the outcome is.
+  \item As \(\sigma\to 0\) (a very narrow spike) the entropy becomes very
+        small: you are almost certain of the value. As \(\sigma\) grows
+        (a very wide curve) the entropy grows: values can land almost
+        anywhere, so uncertainty is high.
+\end{itemize}
+
+\subsubsection*{Maximum-entropy principle}
+
+The entropy under given constraints is maximized by the Normal distribution.
+\begin{enumerate}
+  \item \(\displaystyle\int p(x)\,dx = 1\) (a valid density),
+  \item \(\displaystyle\mathbb{E}[X]=\mu\) and
+        \(\displaystyle\mathrm{Var}(X)=\sigma^2\) (known mean and spread),
+\end{enumerate}
+Equivalently: among all continuous
+distributions that share the same \(\mu\) and \(\sigma^2\), the Gaussian
+is the one with the \textbf{highest} differential entropy. Any other shape
+with the same mean and variance (skewed, multimodal, truncated, \ldots)
+secretly encodes \emph{extra} structure beyond what \(\mu\) and \(\sigma^2\)
+alone justify, and that extra structure \emph{reduces} entropy. 
+Gaussian is therefore the ``least additional-assumption'' choice consistent
+with those two facts the \textbf{maximum entropy principle}~\cite{Blahut2002}.
+
+\subsubsection*{Illustration (same \(\mu,\sigma^2\), different shapes)}
+
+Figure~\ref{fig:maxent} fixes \(\mu=0\) and \(\sigma=1\) and plots three
+densities that all have this mean and variance: Gaussian, Laplace, and
+Uniform. The left panel shows the shapes; the right panel shows their
+differential entropies. 
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.98\textwidth]{figures/maxent_gaussian.png}
+  \caption{Left: three PDFs with identical \(\mu\) and \(\sigma^2\).
+  Right: differential entropy of each. The Gaussian has the largest \(H\);
+  the other shapes add extra structure (sharper peak or hard cut-offs) and
+  therefore lower entropy.}
+  \label{fig:maxent}
+\end{figure}
+
+
+\clearpage
 % ---------------------------------------------------------------------------
 % Question 5
 % ---------------------------------------------------------------------------
@@ -215,5 +431,36 @@ def tanh_derivative(x):
     return 1.0 - t**2
 \end{lstlisting}
 \end{minipage}
+
+% ---------------------------------------------------------------------------
+% References
+% ---------------------------------------------------------------------------
+\begin{thebibliography}{9}
+
+\bibitem{He2018}
+Q.~Peter He,
+\textit{Information Entropy based Indices for Variable Selection Performance
+Assessment},
+in Mario~R.\ Eden, Marianthi~G.\ Ierapetritou, Gavin~P.\ Towler (Eds.),
+\textit{Computer Aided Chemical Engineering}, Elsevier, Volume~44, 2018,
+pp.~2281--2286,
+ISSN~1570-7946, ISBN~9780444642417,
+\url{https://doi.org/10.1016/B978-0-444-64241-7.50375-X}.
+
+\bibitem{CourseRepo}
+Z.~Khan,
+\textit{Deep Learning Course} (source code and scripts),
+GitHub repository,
+\url{https://github.com/ZawarKhan97/Deep_Learning_Course}.
+
+\bibitem{Blahut2002}
+R.~E.\ Blahut,
+\textit{Information Theory and Coding},
+in Wendy~M.\ Middleton, Mac~E.\ Van Valkenburg (Eds.),
+\textit{Reference Data for Engineers} (Ninth Edition), Newnes, 2002,
+pp.~25-1--25-31, ISBN~9780750672917,
+\url{https://doi.org/10.1016/B978-075067291-7/50027-3}.
+
+\end{thebibliography}
 
 \end{document}
