@@ -10,6 +10,8 @@
 \usepackage{caption}
 \usepackage{hyperref}
 \usepackage{url}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc}
 
 \onehalfspacing
 
@@ -72,6 +74,246 @@
   {\large \today\par}
 \end{titlepage}
 
+% ---------------------------------------------------------------------------
+% Question 1
+% ---------------------------------------------------------------------------
+\section*{Q1.\ Function approximation with a deep neural network}
+
+Use deep neural networks to estimate the functions
+(a)~$f(x)=x^{2}$,
+(b)~$f(x)=\sin(x)$, and
+(c)~$f(x)=|x|^{2}$.
+Try data sets of different sizes, e.g.\ 10, 25, 50, 100 points for each
+function. Use $80\%$ of the data for training and $20\%$ for testing.
+
+\begin{enumerate}
+  \item[(a)] Plot the test and training error for different sizes of the data sets.
+  \item[(b)] Try reversing the sign of the weights and observe the performance.
+\end{enumerate}
+
+\noindent\textit{Hint:} Consider starting with a two-layer network with 3 hidden
+units with $\tanh$ activation and a linear output unit.
+
+\subsubsection*{Forward equations and training objective}
+
+The hidden units apply the hyperbolic tangent:
+\begin{align}
+  h_1 &= \tanh(w_1 x + b_1), \\
+  h_2 &= \tanh(w_2 x + b_2), \\
+  h_3 &= \tanh(w_3 x + b_3).
+\end{align}
+The output unit is \textbf{linear}: a weighted sum of the hidden activations
+plus a bias,
+\begin{equation}
+  \hat{y}
+    = W_1 h_1 + W_2 h_2 + W_3 h_3 + b_{\mathrm{out}}.
+  \label{eq:q1out}
+\end{equation}
+ The training is done by minimising the \textbf{mean squared error} (MSE)
+\begin{equation}
+  \mathrm{MSE}
+    = \frac{1}{N}\sum_{n=1}^{N}\bigl(\hat{y}_n - y_n\bigr)^{2}
+    = \frac{1}{N}\sum_{n=1}^{N}\bigl(\hat{y}_n - f(x_n)\bigr)^{2}.
+  \label{eq:q1mse}
+\end{equation}
+Reaching exactly zero MSE is not expected in practice; a small positive value
+is an acceptable stopping region (limits to be set later). Moreover, Weights are initialised randomly:
+hidden $(w_1,b_1)$, $(w_2,b_2)$, $(w_3,b_3)$ and output
+$(W_1,W_2,W_3,b_{\mathrm{out}})$.
+
+\subsubsection*{Network architecture (block diagram)}
+
+Figure~\ref{fig:q1arch} shows one scalar input~$x$ (not counted as a layer),
+one hidden layer with three $\tanh$ neurons, and one linear output~$\hat{y}$.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tikzpicture}[
+      >=Latex,
+      neuron/.style={circle, draw=black, thick, minimum size=11mm, inner sep=0pt},
+      inputnode/.style={circle, draw=black, thick, minimum size=10mm, fill=gray!12},
+      outputnode/.style={circle, draw=black, thick, minimum size=11mm, fill=gray!12},
+      layerlabel/.style={font=\small\bfseries, align=center},
+      note/.style={font=\footnotesize, align=center},
+    ]
+    % Input
+    \node[inputnode] (x) at (0,0) {$x$};
+    \node[layerlabel, below=0.55cm of x] {Input\\(not a layer)};
+
+    % Hidden layer (3 units)
+    \node[neuron] (h1) at (4.2, 1.6) {$h_1$};
+    \node[neuron] (h2) at (4.2, 0.0) {$h_2$};
+    \node[neuron] (h3) at (4.2,-1.6) {$h_3$};
+    \node[layerlabel, below=0.55cm of h3] {Hidden layer\\(3 units, $\tanh$)};
+
+    % Output
+    \node[outputnode] (y) at (8.4, 0.0) {$\hat{y}$};
+    \node[layerlabel, below=0.55cm of y] {Output layer\\(linear)};
+
+    % Connections: input -> hidden
+    \foreach \h in {h1,h2,h3} {
+      \draw[->, thick] (x) -- (\h);
+    }
+    % Connections: hidden -> output
+    \foreach \h in {h1,h2,h3} {
+      \draw[->, thick] (\h) -- (y);
+    }
+
+    % Activation annotations
+    \node[note, right=0.05cm of h1] {$\tanh$};
+    \node[note, above=0.05cm of h2] {$\tanh$};
+    \node[note, right=0.05cm of h3] {$\tanh$};
+  \end{tikzpicture}
+  \caption{Initial network for Q1: one input $x$, one hidden layer with three
+  $\tanh$ units, and one linear output
+  $\hat{y}=W_1 h_1+W_2 h_2+W_3 h_3+b_{\mathrm{out}}$.}
+  \label{fig:q1arch}
+\end{figure}
+
+\subsubsection*{(a)\ Target $f(x)=x^{2}$}
+
+Training uses a \textbf{fixed epoch budget} (not MSE$\to 0$). Driving the
+loss all the way to zero would increase time and computational cost sharply, so we keep a
+finite schedule and report both error and time versus $N$. Datasets of size
+$N\in\{10,25,50,100\}$ are drawn on $x\in[-2,2]$, with $80\%$ training and
+$20\%$ testing. Full source code is available in the course
+repository~\cite{CourseRepo}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/q1_train_square.png}
+  \caption{Training view for $f(x)=x^{2}$: orange solid curve is the true
+  $f(x)$; coloured curves are network fits for each training-set size $N$
+  (same colour coding as the test plot).}
+  \label{fig:q1train_sq}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/q1_test_square.png}
+  \caption{Test view for $f(x)=x^{2}$: orange dotted curve is the true
+  $f(x)$; coloured markers are network predictions on the held-out $20\%$
+  test samples. Vertical bars (same colour per $N$) run from the true value
+  to the prediction (residual / Excel-style error bars).}
+  \label{fig:q1test_sq}
+\end{figure}
+
+\subsubsection*{Python implementation (modular core)}
+\par\medskip
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption={Forward pass, MSE, and training entry point}]
+import numpy as np
+
+def forward(x, w, b, W, b_out):
+    h = np.tanh(x[:, None] * w[None, :] + b[None, :])
+    return h @ W + b_out
+
+def mse(y_hat, y_true):
+    return float(np.mean((y_hat - y_true) ** 2))
+
+# Fixed epochs (not until MSE = 0). 
+\end{lstlisting}
+\end{minipage}
+
+\subsubsection*{Conclusion plots (MSE and time cost)}
+
+\noindent\begin{minipage}{\linewidth}
+\begin{center}
+  \includegraphics[width=0.92\textwidth]{figures/fit_square_errors.png}\\[0.8em]
+  \includegraphics[width=0.92\textwidth]{figures/fit_square_time.png}
+\end{center}
+\captionof{figure}{Train/test MSE (top) and training wall-clock time (bottom)
+versus dataset size for $f(x)=x^{2}$ under a fixed epoch budget.}
+\label{fig:q1mse_time_sq}
+\end{minipage}
+
+\subsubsection*{Final learned weights}
+\noindent\begin{minipage}{\linewidth}
+\centering
+\small
+\input{figures/q1_weights_square.tex}
+\captionof{table}{Final trained parameters for $f(x)=x^{2}$ at each dataset size $N$.}
+\label{tab:q1w_sq}
+\end{minipage}
+
+\subsubsection*{Analysis}
+The training plot shows that using a larger dataset generally improves how
+closely the network follows the true $f(x)=x^{2}$ curve. However, when the
+dataset size is increased to $N=100$, the fitted curves start to deviate and
+show overfitting behaviour. The MSE plot shows that, overall, the error trend
+improves as more training data are used, while the test view indicates that
+the $N=25$ set performed best for this target; further increasing the dataset
+size raised the observed test error rate for this run.
+
+\clearpage
+\subsubsection*{Target $f(x)=\sin(x)$}
+
+The same network and fixed-epoch MSE training are used, but the input domain
+for this target is sampled in \textbf{degrees} on $x\in[-180^{\circ},180^{\circ}]$
+and converted to radians before evaluating the sine and before feeding the
+network
+($x_{\mathrm{rad}}=\pi x_{\mathrm{deg}}/180$), so plots show a clear
+period while $\tanh$ units are not saturated by degree-scale inputs.
+Source:~\cite{CourseRepo}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/q1_train_sin.png}
+  \caption{Training fits for $f(x)=\sin(x)$ with $x$ in degrees
+  (converted to radians for the target).}
+  \label{fig:q1train_sin}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/q1_test_sin.png}
+  \caption{Test predictions with residual bars for $f(x)=\sin(x)$.}
+  \label{fig:q1test_sin}
+\end{figure}
+
+\subsubsection*{Conclusion plots (MSE and time cost)}
+
+\noindent\begin{minipage}{\linewidth}
+\begin{center}
+  \includegraphics[width=0.92\textwidth]{figures/fit_sin_errors.png}\\[0.8em]
+  \includegraphics[width=0.92\textwidth]{figures/fit_sin_time.png}
+\end{center}
+\captionof{figure}{Train/test MSE (top) and training wall-clock time (bottom)
+versus dataset size for $f(x)=\sin(x)$ under a fixed epoch budget.}
+\label{fig:q1mse_time_sin}
+\end{minipage}
+
+\subsubsection*{Final learned weights}
+\noindent\begin{minipage}{\linewidth}
+\centering
+\small
+\input{figures/q1_weights_sin.tex}
+\captionof{table}{Final trained parameters for $f(x)=\sin(x)$ at each dataset size $N$.}
+\label{tab:q1w_sin}
+\end{minipage}
+
+\subsubsection*{Analysis}
+Over this interval the training plot shows that for smaller datasets the
+fitted curves do not match the true sinusoid well. Increasing the dataset
+size finds better weights, so the learned behaviour becomes finer and closer
+to the true curve. In particular, $N=50$ is a good approximation for this
+target: increasing the data further mainly raises computational and timing
+cost under our fixed-epoch schedule. The test results also show that for
+$N=100$ the error increases and finding the weights takes longer than for
+$N=50$, even though a longer budget might eventually do better---so the
+computation cost must be understood as well. The train-time plot generally
+rises with $N$, with some variability at $N=100$, where accuracy was still
+worse: with the epoch budget exhausted the optimiser did not fully converge
+and the large-data run appears to oscillate more. The MSE plot confirms this
+analysis.
+
+\clearpage
+\subsubsection*{Target $f(x)=|x|^{2}$}
+
+For real $x$, $|x|^{2}=x^{2}$, so this target produces the same parabola as
+part~(a). The experiment is therefore not repeated.
+
+\clearpage
 % ---------------------------------------------------------------------------
 % Question 2
 % ---------------------------------------------------------------------------
